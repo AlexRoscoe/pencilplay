@@ -9,6 +9,7 @@ import java.awt.image.BufferedImageOp;
 import java.awt.image.ColorConvertOp;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -18,8 +19,9 @@ import javax.swing.JPanel;
 
 public class ImageProcessor {
 	
-	BufferedImage anImage;
-	JLabel ImageLabel = new JLabel();
+	private BufferedImage anImage;
+	private JLabel ImageLabel = new JLabel();
+	private int imageWidth, imageHeight;
 	
 	public ImageProcessor(){}
 	
@@ -71,6 +73,46 @@ public class ImageProcessor {
 		jp.add(ImageLabel);
 		jf.pack();
 		jf.setVisible(true);
+		
+	}
+	
+	public void findFloor(int[][] img) {
+		ArrayList<Point> leftSide = new ArrayList<Point>(); 
+		// Check left side
+		for (int i = 0; i < imageWidth/4; i++) {
+			for (int j = 0; j < imageHeight; j++) {
+				if (img[i][j] == 1) {
+					leftSide.add(new Point(i, j)); 
+				}
+				if (leftSide.size() >= 20) { // We have enough points to try. 
+					break; 
+				}
+			}
+		}
+		ArrayList<Point> rightSide = new ArrayList<Point>(); 
+		// Check right side
+		for (int i = imageWidth-1; i > imageWidth - imageWidth/4; i--) {
+			for (int j = 0; j < imageHeight; j++) {
+				if (img[i][j] == 1) {
+					rightSide.add(new Point(i, j)); 
+				}
+				if (rightSide.size() >= 20) { // We have enough points to try. 
+					break; 
+				}
+			}
+		}
+		ArrayList<Point> bottom = new ArrayList<Point>(); 
+		// Check bottom
+		for (int i = 0; i < imageWidth; i++) {
+			for (int j = imageHeight-1; j > imageHeight - imageHeight/4; j--) {
+				if (img[i][j] == 1) {
+					bottom.add(new Point(i, j)); 
+				}
+				if (bottom.size() >= 20) { // We have enough points to try. 
+					break; 
+				}
+			}
+		}
 		
 	}
 	
