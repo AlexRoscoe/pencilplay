@@ -1,24 +1,26 @@
 package server;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-
 import javax.imageio.ImageIO;
-
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.ValueEventListener;
 
 public class Server {
 	private Firebase db;
-
-	public Server() {
-		
-	}
+	private String baseURL = "https://pencilplay.firebaseio.com/";
 	
-	public void initialize() {
-		db = new Firebase("https://pencilplay.firebaseio.com/");
+	public void pushImage() {
+		db = new Firebase(baseURL);
+		int[] a = {2, 3, 4, 1, 12, 23};
+		db.child("image").setValue(a);
+	}
+
+	public Server() {}
+	
+	public void run() {
+		db = new Firebase(baseURL + "/image");
 		db.addValueEventListener(new ValueEventListener() {
 
 			@Override
@@ -29,22 +31,31 @@ public class Server {
 
 			@Override
 			public void onDataChange(DataSnapshot snap) {
-				BufferedImage img = extractImage(); 
-				// Processes the image
-				ImageProcessor processor = new ImageProcessor();
-				// Extract necessary values
-				processor.processImage(img);
-				int startPosX = processor.getStartPosition().x;
-				int startPosY = processor.getStartPosition().y; 
-				int[][] floor = processor.getFloor(); 
+				Object jsonImage = snap.getValue(); 
+				if (jsonImage != null) {
+					// Deserialize the image
+					BufferedImage img = extractImage(jsonImage); 
+					// Processes the image
+					ImageProcessor processor = new ImageProcessor();
+					// Extract necessary values
+					processor.processImage(img);
+					int startPosX = processor.getStartPosition().x;
+					int startPosY = processor.getStartPosition().y; 
+					int[][] floor = processor.getFloor(); 
+					// Update Firebase
+					Firebase level = new Firebase(baseURL + "/level");
+					level.child("startPosX").setValue(startPosX);
+					level.child("startPosY").setValue(startPosY);
+					level.child("floor").setValue(floor);
+				}
 			}
 		});
 	}
 	
-	public BufferedImage extractImage() {
-		BufferedImage img;
+	public BufferedImage extractImage(Object jsonImg) {
+		BufferedImage img = null;
 		try {
-			img = ImageIO.read(ImageIO.createImageInputStream(snap.getValue()));
+			img = ImageIO.read(ImageIO.createImageInputStream(jsonImg));
 		} catch (IOException e) {
 			System.out.println("Error reading image from Firebase.");
 			e.printStackTrace();
@@ -52,4 +63,9 @@ public class Server {
 		return img; 
 	}
 	
+	public static void main(String[] args) {
+		Server server = new Server(); 
+		//server.run();
+		server.pushImage();
+	}
 }

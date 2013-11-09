@@ -4,7 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
-
+import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -12,17 +12,16 @@ import javax.swing.JPanel;
 
 public class ImageProcessor {
 	
-	BufferedImage anImage;
-	JLabel ImageLabel = new JLabel();
-	JFrame frame = new JFrame();
-	JPanel jp = new JPanel();
-	Container pane = frame.getContentPane();
+
+	private BufferedImage anImage;
+	private JLabel ImageLabel = new JLabel();
+	private JFrame frame = new JFrame();
+	private JPanel jp = new JPanel();
+	private Container pane = frame.getContentPane();
+	private int imageWidth, imageHeight;
+	private int[][] imageArray, combination, convX, convY;
 	
 	public ImageProcessor(){}
-	int[][] imageArray;
-	int[][] combination;
-	int[][] convX;
-	int[][] convY;
 	
 	
 	public void processImage(BufferedImage img) {
@@ -129,6 +128,46 @@ public class ImageProcessor {
 			}
 		}
 		return arr;
+	}
+	
+	public void findFloor(int[][] img) {
+		ArrayList<Point> leftSide = new ArrayList<Point>(); 
+		// Check left side
+		for (int i = 0; i < imageWidth/4; i++) {
+			for (int j = 0; j < imageHeight; j++) {
+				if (img[i][j] == 1) {
+					leftSide.add(new Point(i, j)); 
+				}
+				if (leftSide.size() >= 20) { // We have enough points to try. 
+					break; 
+				}
+			}
+		}
+		ArrayList<Point> rightSide = new ArrayList<Point>(); 
+		// Check right side
+		for (int i = imageWidth-1; i > imageWidth - imageWidth/4; i--) {
+			for (int j = 0; j < imageHeight; j++) {
+				if (img[i][j] == 1) {
+					rightSide.add(new Point(i, j)); 
+				}
+				if (rightSide.size() >= 20) { // We have enough points to try. 
+					break; 
+				}
+			}
+		}
+		ArrayList<Point> bottom = new ArrayList<Point>(); 
+		// Check bottom
+		for (int i = 0; i < imageWidth; i++) {
+			for (int j = imageHeight-1; j > imageHeight - imageHeight/4; j--) {
+				if (img[i][j] == 1) {
+					bottom.add(new Point(i, j)); 
+				}
+				if (bottom.size() >= 20) { // We have enough points to try. 
+					break; 
+				}
+			}
+		}
+		
 	}
 	
 	// Returns the starting position of the player.
