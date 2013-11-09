@@ -2,6 +2,7 @@ package server;
 
 import java.awt.BorderLayout;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -20,8 +21,25 @@ public class ImageProcessor {
 	BufferedImage anImage;
 	JLabel ImageLabel = new JLabel();
 	
-	public ImageProcessor(){
-		doStuff();
+	public ImageProcessor(){}
+	
+	public void processImage(BufferedImage img) {
+		this.anImage = img;
+		// Convert to grayScale image
+		doStuff(); 
+		// Get x gradient
+		
+		// Get y gradient
+		
+		// combine
+		
+		// clean up (average into one line)
+		
+		// Edge creep to find floor
+		
+		// remove floor
+		
+		// find player
 	}
 	
 	public void doStuff(){
@@ -54,5 +72,15 @@ public class ImageProcessor {
 		jf.pack();
 		jf.setVisible(true);
 		
+	}
+	
+	// Returns the starting position of the player.
+	public Point getStartPosition() {
+		return new Point(0, 0); 
+	}
+	
+	// Returns a screen containing only the pixels corresponding to the floor. 
+	public int[][] getFloor() {
+		return new int[6][9];
 	}
 }

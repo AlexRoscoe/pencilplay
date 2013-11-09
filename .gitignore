@@ -2,3 +2,5 @@
 .metadata/
 .project
 *.class
+.DS_Store
+
