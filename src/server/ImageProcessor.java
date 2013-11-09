@@ -1,17 +1,8 @@
 package server;
 
-import java.awt.BorderLayout;
-import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ColorConvertOp;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,21 +12,40 @@ public class ImageProcessor {
 	
 	private BufferedImage anImage;
 	private JLabel ImageLabel = new JLabel();
+	private JFrame frame = new JFrame();
+	private JPanel jp = new JPanel();
 	private int imageWidth, imageHeight;
+	private int[][] imageArray, combination, convX, convY;
+	
 	
 	public ImageProcessor(){}
 	
+	
 	public void processImage(BufferedImage img) {
-		this.anImage = img;
-		// Convert to grayScale image
-		doStuff(); 
+		
+		imageArray = getGrayscale(img);
+		
 		// Get x gradient
+		convX = convoluteX();
 		
-		// Get y gradient
+		// Get y gradient, first need to get column
+		convY = convoluteY();
 		
-		// combine
+		// combine 
+		combination = combine(convX, convY);
 		
 		// clean up (average into one line)
+		for(int i = 0; i < combination.length; i++){
+			for(int j = 0; j < combination.length; j++){
+				anImage.setRGB(i, j, combination[i][j]);
+			}
+		}
+		ImageLabel.setIcon(new ImageIcon(anImage));
+		ImageLabel.setHorizontalAlignment(JLabel.CENTER);
+		frame.add(jp);
+		jp.add(ImageLabel);
+		jp.setVisible(true);
+		
 		
 		// Edge creep to find floor
 		
@@ -44,36 +54,81 @@ public class ImageProcessor {
 		// find player
 	}
 	
-	public void doStuff(){
-		
-		JFrame jf = new JFrame();
-		JPanel jp = new JPanel();
-		//Container pane = jf.getContentPane();
-		
-		File file = new File("C:/Dev/pencilplay/testData/images/Image.jpg");
-		try {
-			anImage = ImageIO.read(file);
-		} catch (IOException e) {
-			e.printStackTrace();
+	// Convert to grayScale image
+	public int[][] getGrayscale(BufferedImage image){
+	
+		int[][] imageArray = new int[image.getWidth()][image.getHeight()];
+		for (int i = 0; i < image.getWidth(); i++) {
+			for (int j = 0; j < image.getHeight(); j++) {
+				int rgb = image.getRGB(i, j);
+				int r = (rgb >> 16) & 0xFF;
+				int g = (rgb >> 8) & 0xFF;
+				int b = (rgb & 0xFF);
+				int gray = (r + g + b) / 3;
+				imageArray[i][j] = gray;
+			}
+		}
+		return imageArray;
+	}
+	
+	//get x gradient
+	private int[][] convoluteX(){
+		int max =0 ;
+		int[][] xArray = new int[imageArray.length][imageArray[0].length];
+		for(int i = 1; i < imageArray.length-1; i++){
+			for(int j = 1; j < imageArray[0].length-1; j++){
+				
+				int x1 = imageArray[i-1][j];
+				int x2 = imageArray[i+1][j];
+				
+				double val = Math.abs(x1-x2);
+				xArray[i][j] = (int) val;
+				if(max < (int)val){
+					max = (int) val;
+				}
+			}
+		}
+		System.out.println(max);
+		return xArray;
+	}
+	
+	//get y gradient
+	private int[][] convoluteY()
+	{
+		int max =0 ;
+		int[][] yArray = new int[imageArray.length][imageArray[0].length];
+		for(int i = 1; i < imageArray.length-1; i++){
+			for(int j = 1; j < imageArray[0].length-1; j++){
+				
+				int y1 = imageArray[i][j-1];
+				int y2 = imageArray[i][j+1];
+				
+				double val = Math.abs(y1-y2);
+				yArray[i][j] = (int) val;
+				if(max < (int)val){
+					max = (int) val;
+				}
+				
+			}
 		}
 		
-		BufferedImage gray = new BufferedImage(anImage.getWidth(),anImage.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
-		ColorConvertOp op = new ColorConvertOp(anImage.getColorModel().getColorSpace(), gray.getColorModel().getColorSpace(), null);
-		
-		anImage = op.filter(anImage, gray);
-		Graphics2D graphics = anImage.createGraphics();	
-		graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		graphics.drawImage(anImage, 0, 0, anImage.getWidth(), anImage.getHeight(), null);
-		graphics.dispose();
-		
-		ImageLabel.setIcon(new ImageIcon(anImage));
-		ImageLabel.setHorizontalAlignment(JLabel.CENTER);
-		jf.setLayout(new BorderLayout());
-		jf.add(jp, BorderLayout.SOUTH);
-		jp.add(ImageLabel);
-		jf.pack();
-		jf.setVisible(true);
-		
+		System.out.println(max);
+		return yArray;
+	}
+	
+	private int[][] combine(int[][] convX, int[][] convY){
+		int[][] arr = new int[convX.length][convY[0].length];
+		for(int i =0; i < convX.length; i++){
+			for(int j =0; i < convY[0].length; i++){
+				if(convX[i][j] == 1 || convY[i][j] == 1){
+					arr[i][j] = 1;  
+				 } else {
+					 arr[i][j] = 0; 
+				 }
+				
+			}
+		}
+		return arr;
 	}
 	
 	public void findFloor(int[][] img) {
