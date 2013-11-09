@@ -13,7 +13,6 @@ public class TestImage {
 		BufferedImage bI = ImageIO.read(file);
 		ImageProcessor ip = new ImageProcessor();
 		ip.processImage(bI);
-		System.out.print("test"); 
 	}
 	
 }

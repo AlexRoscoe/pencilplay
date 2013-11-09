@@ -1,5 +1,7 @@
 package server;
 
+import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 
@@ -14,6 +16,7 @@ public class ImageProcessor {
 	JLabel ImageLabel = new JLabel();
 	JFrame frame = new JFrame();
 	JPanel jp = new JPanel();
+	Container pane = frame.getContentPane();
 	
 	public ImageProcessor(){}
 	int[][] imageArray;
@@ -24,7 +27,17 @@ public class ImageProcessor {
 	
 	public void processImage(BufferedImage img) {
 		
-		imageArray = getGrayscale(img);
+		anImage = img;
+		ImageLabel.setIcon(new ImageIcon(anImage));
+		ImageLabel.setHorizontalAlignment(JLabel.CENTER);
+		
+		frame.add(jp);
+		jp.setLayout(new BorderLayout());
+		jp.add(ImageLabel , BorderLayout.SOUTH);
+		frame.pack();
+		frame.setVisible(true);
+		
+		imageArray = getGrayscale(anImage);
 		
 		// Get x gradient
 		convX = convoluteX();
@@ -34,18 +47,17 @@ public class ImageProcessor {
 		
 		// combine 
 		combination = combine(convX, convY);
-		
-		// clean up (average into one line)
-		for(int i = 0; i < combination.length; i++){
-			for(int j = 0; j < combination.length; j++){
+		for(int i = 1; i < combination.length-1; i++){
+			for(int j = 1; j < combination[0].length-1; j++){
 				anImage.setRGB(i, j, combination[i][j]);
+				if(combination[i][j] == 1){
+					System.out.print(combination[i][j]);
+				}
 			}
 		}
-		ImageLabel.setIcon(new ImageIcon(anImage));
-		ImageLabel.setHorizontalAlignment(JLabel.CENTER);
-		frame.add(jp);
-		jp.add(ImageLabel);
-		jp.setVisible(true);
+		
+		
+		// clean up (average into one line)
 		
 		
 		// Edge creep to find floor
@@ -74,7 +86,6 @@ public class ImageProcessor {
 	
 	//get x gradient
 	private int[][] convoluteX(){
-		int max =0 ;
 		int[][] xArray = new int[imageArray.length][imageArray[0].length];
 		for(int i = 1; i < imageArray.length-1; i++){
 			for(int j = 1; j < imageArray[0].length-1; j++){
@@ -84,19 +95,13 @@ public class ImageProcessor {
 				
 				double val = Math.abs(x1-x2);
 				xArray[i][j] = (int) val;
-				if(max < (int)val){
-					max = (int) val;
-				}
 			}
 		}
-		System.out.println(max);
 		return xArray;
 	}
 	
 	//get y gradient
-	private int[][] convoluteY()
-	{
-		int max =0 ;
+	private int[][] convoluteY(){
 		int[][] yArray = new int[imageArray.length][imageArray[0].length];
 		for(int i = 1; i < imageArray.length-1; i++){
 			for(int j = 1; j < imageArray[0].length-1; j++){
@@ -104,16 +109,10 @@ public class ImageProcessor {
 				int y1 = imageArray[i][j-1];
 				int y2 = imageArray[i][j+1];
 				
-				double val = Math.abs(y1-y2);
-				yArray[i][j] = (int) val;
-				if(max < (int)val){
-					max = (int) val;
-				}
-				
+				int val = Math.abs(y1-y2);
+				yArray[i][j] =  val;
 			}
 		}
-		
-		System.out.println(max);
 		return yArray;
 	}
 	
@@ -122,9 +121,9 @@ public class ImageProcessor {
 		for(int i =0; i < convX.length; i++){
 			for(int j =0; i < convY[0].length; i++){
 				if(convX[i][j] == 1 || convY[i][j] == 1){
-					arr[i][j] = 1;  
+					arr[i][j] = 0;  
 				 } else {
-					 arr[i][j] = 0; 
+					 arr[i][j] = 1; 
 				 }
 				
 			}
