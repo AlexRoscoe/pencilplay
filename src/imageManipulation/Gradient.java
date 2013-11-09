@@ -48,47 +48,14 @@ public class Gradient extends Object
 		return norm;
 	}
 
-	private double convoluteX(int[] pix, Point p, Dimension d)
-	{
-		//double valm1 = findValue(pix,d,new Point(p.x-1,p.y)) * 1;
-		//double valp1 = findValue(pix,d,new Point(p.x+1,p.y)) * (-1);
-		
-		try
-		{
-			Point p1 = new Point(p.x-1,p.y);
-			double valm1 = pix[p1.y*d.height+p1.x];
-			Point p2 = new Point(p.x+1,p.y);
-			double valp1 = pix[p2.y*d.height+p2.x];
-			double val = valp1 - valm1;
-			return val;
-		}
-		catch (ArrayIndexOutOfBoundsException ex){}
-		
-		return 0;
-	}
+
 
 	private long coords2index(Point p, Dimension d)
 	{
 		return p.y*d.height + p.x;
 	}
 
-	private double convoluteY(int[] pix, Point p, Dimension d)
-	{
-		try
-		{
-			//double valm1 = findValue(pix,d,new Point(p.x,p.y-1)) * 1;
-			////double valp1 = findValue(pix,d,new Point(p.x,p.y+1)) * (-1);
-			Point p1 = new Point(p.x,p.y-1);
-			double valm1 = pix[p1.y*d.height+p1.x];
-			Point p2 = new Point(p.x,p.y+1);
-			double valp1 = pix[p2.y*d.height+p2.x];
-			double val = valp1 - valm1;
-			return val;
-		}
-		catch (ArrayIndexOutOfBoundsException ex){}
-		
-		return 0;
-	}
+	
 
 	private double findValue(int[] pix, Dimension imageDimension, Point coord)
 	{
